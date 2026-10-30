@@ -7,6 +7,21 @@ public static class Seed
 	public static async Task RunAsync(AppDb db)
 	{
 		await db.Database.EnsureCreatedAsync();
+		await db.Database.ExecuteSqlRawAsync("""
+			IF OBJECT_ID(N'[Messages]', N'U') IS NULL
+			BEGIN
+				CREATE TABLE [Messages] (
+					[Id] int IDENTITY(1,1) NOT NULL CONSTRAINT [PK_Messages] PRIMARY KEY,
+					[SessionId] int NOT NULL,
+					[SenderId] int NOT NULL,
+					[Content] nvarchar(2000) NOT NULL,
+					[CreatedAt] datetime2 NOT NULL CONSTRAINT [DF_Messages_CreatedAt] DEFAULT SYSUTCDATETIME(),
+					CONSTRAINT [FK_Messages_Sessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [Sessions] ([Id]) ON DELETE CASCADE,
+					CONSTRAINT [FK_Messages_Users_SenderId] FOREIGN KEY ([SenderId]) REFERENCES [Users] ([Id])
+				);
+				CREATE INDEX [IX_Messages_SessionId_Id] ON [Messages] ([SessionId], [Id]);
+			END
+			""");
 
 		if (await db.Mentors.AnyAsync())
 			return;

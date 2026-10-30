@@ -9,6 +9,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
 	public DbSet<Mentor> Mentors => Set<Mentor>();
 	public DbSet<Session> Sessions => Set<Session>();
 	public DbSet<SessionAction> SessionActions => Set<SessionAction>();
+	public DbSet<Message> Messages => Set<Message>();
 
 	protected override void OnModelCreating(ModelBuilder b)
 	{
@@ -23,6 +24,9 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
 		b.Entity<Mentor>().HasIndex(m => m.UserId).IsUnique();
 
 		b.Entity<Session>().HasMany(s => s.Actions).WithOne().HasForeignKey(a => a.SessionId).OnDelete(DeleteBehavior.Cascade);
+		b.Entity<Message>().Property(m => m.Content).HasMaxLength(2000);
+		b.Entity<Message>().HasOne(m => m.Sender).WithMany().HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
+		b.Entity<Message>().HasIndex(m => new { m.SessionId, m.Id });
 		b.Entity<Session>().HasIndex(s => s.MenteeId);
 		// A mentor can't be double-booked unless the earlier booking was cancelled.
 		b.Entity<Session>()

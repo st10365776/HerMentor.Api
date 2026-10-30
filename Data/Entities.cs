@@ -63,6 +63,16 @@ public class SessionAction
 	public bool Done { get; set; }
 }
 
+public class Message
+{
+	public int Id { get; set; }
+	public int SessionId { get; set; }
+	public int SenderId { get; set; }
+	public string Content { get; set; } = "";
+	public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+	public User? Sender { get; set; }
+}
+
 public static class SessionStatus
 {
 	public const string Booked = "Booked";

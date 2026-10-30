@@ -79,6 +79,7 @@ app.MapMentors();
 app.MapCareer();
 app.MapPrep();
 app.MapSessions();
+app.MapMessages();
 app.MapHub<MentorsHub>("/hubs/mentors");
 app.MapHub<AssistantHub>("/hubs/assistant");
 
