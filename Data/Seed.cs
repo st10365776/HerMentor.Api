@@ -7,6 +7,47 @@ public static class Seed
 	public static async Task RunAsync(AppDb db)
 	{
 		await db.Database.EnsureCreatedAsync();
+
+		// EnsureCreated skips existing databases, so add newer tables and indexes without wiping them.
+		await db.Database.ExecuteSqlRawAsync("""
+			IF OBJECT_ID(N'[Sessions]', N'U') IS NULL
+			BEGIN
+				CREATE TABLE [Sessions] (
+					[Id] int IDENTITY(1,1) NOT NULL CONSTRAINT [PK_Sessions] PRIMARY KEY,
+					[MenteeId] int NOT NULL,
+					[MentorId] int NOT NULL,
+					[StartsAt] datetime2 NOT NULL,
+					[Format] nvarchar(max) NOT NULL,
+					[Topic] nvarchar(max) NOT NULL,
+					[Goal] nvarchar(max) NOT NULL,
+					[Status] nvarchar(max) NOT NULL,
+					[PrepJson] nvarchar(max) NULL,
+					[Summary] nvarchar(max) NOT NULL,
+					[MentorFeedback] nvarchar(max) NOT NULL,
+					[CreatedAt] datetime2 NOT NULL
+				);
+			END
+			""");
+		await db.Database.ExecuteSqlRawAsync("""
+			IF OBJECT_ID(N'[SessionActions]', N'U') IS NULL
+			BEGIN
+				CREATE TABLE [SessionActions] (
+					[Id] int IDENTITY(1,1) NOT NULL CONSTRAINT [PK_SessionActions] PRIMARY KEY,
+					[SessionId] int NOT NULL,
+					[Text] nvarchar(max) NOT NULL,
+					[Done] bit NOT NULL,
+					CONSTRAINT [FK_SessionActions_Sessions_SessionId] FOREIGN KEY ([SessionId]) REFERENCES [Sessions] ([Id]) ON DELETE CASCADE
+				);
+			END
+			""");
+		await db.Database.ExecuteSqlRawAsync("""
+			IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = N'IX_Sessions_MenteeId' AND [object_id] = OBJECT_ID(N'[Sessions]'))
+				CREATE INDEX [IX_Sessions_MenteeId] ON [Sessions] ([MenteeId]);
+			IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = N'IX_Sessions_MentorId_StartsAt' AND [object_id] = OBJECT_ID(N'[Sessions]'))
+				CREATE UNIQUE INDEX [IX_Sessions_MentorId_StartsAt] ON [Sessions] ([MentorId], [StartsAt]) WHERE [Status] <> N'Cancelled';
+			IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE [name] = N'IX_SessionActions_SessionId' AND [object_id] = OBJECT_ID(N'[SessionActions]'))
+				CREATE INDEX [IX_SessionActions_SessionId] ON [SessionActions] ([SessionId]);
+			""");
 		await db.Database.ExecuteSqlRawAsync("""
 			IF OBJECT_ID(N'[Messages]', N'U') IS NULL
 			BEGIN

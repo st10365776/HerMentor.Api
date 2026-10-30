@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HerMentor.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f2c17551d643c8f45a73b917a9e608122bd2b60b")]
 [assembly: System.Reflection.AssemblyProductAttribute("HerMentor.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HerMentor.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
